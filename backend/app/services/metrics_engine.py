@@ -1,9 +1,10 @@
 """
 Quantitative metrics engine for UK wind generation forecast evaluation.
-Computes MAE, RMSE, WAPE, MAPE, MBE, quantiles, and diurnal error profiles.
+Computes MAE, RMSE, WAPE, MAPE, MBE, quantiles, diurnal error profiles,
+histogram bins for error distribution, and day-by-SP heatmap matrices.
 """
 
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
 import numpy as np
 import pandas as pd
 
@@ -12,7 +13,9 @@ from app.models.schemas import (
     AccuracyMetrics,
     DiurnalPeriodStat,
     DailySummary,
-    MonthOverviewResponse
+    MonthOverviewResponse,
+    OverviewResponse,
+    AccuracyResponse
 )
 from app.services.data_processor import DataProcessor
 
@@ -48,7 +51,7 @@ class MetricsEngine:
         sum_actuals = float(np.sum(actuals))
         wape = float((np.sum(abs_errors) / sum_actuals * 100.0)) if sum_actuals > 0 else 0.0
 
-        # MAPE with floor to avoid division by zero
+        # MAPE with floor of 100 MW to avoid dividing by tiny outturns
         denom = np.maximum(actuals, 100.0)
         mape = float(np.mean(abs_errors / denom) * 100.0)
 
@@ -187,4 +190,211 @@ class MetricsEngine:
             totalPeriods=len(all_points),
             overallMetrics=overall_metrics,
             dailyBreakdown=daily_breakdowns
+        )
+
+    @staticmethod
+    def compute_overview(
+        processor: DataProcessor,
+        start_date: str = "2026-01-01",
+        end_date: str = "2026-01-31",
+        cutoff_time: str = "11:00"
+    ) -> OverviewResponse:
+        """
+        Generates the executive Overview payload for WindIQ Page 1.
+        Matches actuals vs forecasts for the selected date range and decision cutoff.
+        """
+        all_dates = [d for d in processor.get_available_dates() if start_date <= d <= end_date]
+        all_points: List[HalfHourlyDataPoint] = []
+        daily_trends: List[DailySummary] = []
+        latest_pub_time = None
+
+        for d in all_dates:
+            points, dec_date, cutoff_used = processor.get_day_ahead_data(d, gate_closure_time=cutoff_time)
+            all_points.extend(points)
+
+            valid_pts = [p for p in points if p.actualMW is not None and p.dayAheadForecastMW is not None]
+            if valid_pts:
+                acts = [p.actualMW for p in valid_pts]
+                fcs = [p.dayAheadForecastMW for p in valid_pts]
+                errs = [p.dayAheadForecastMW - p.actualMW for p in valid_pts]
+                abs_errs = [abs(e) for e in errs]
+                daily_trends.append(DailySummary(
+                    deliveryDate=d,
+                    totalPeriods=len(valid_pts),
+                    avgActualMW=round(float(np.mean(acts)), 1),
+                    avgForecastMW=round(float(np.mean(fcs)), 1),
+                    maeMW=round(float(np.mean(abs_errs)), 1),
+                    rmseMW=round(float(np.sqrt(np.mean(np.array(errs) ** 2))), 1),
+                    biasMW=round(float(np.mean(errs)), 1),
+                    maxErrorMW=round(float(np.max(abs_errs)), 1)
+                ))
+
+            for p in points:
+                if p.dayAheadPublishTime:
+                    if latest_pub_time is None or p.dayAheadPublishTime > latest_pub_time:
+                        latest_pub_time = p.dayAheadPublishTime
+
+        overall_metrics = MetricsEngine.compute_accuracy_metrics(all_points)
+        matched_obs = overall_metrics.totalPeriods
+        total_possible = len(all_dates) * 48
+        coverage_pct = round((matched_obs / total_possible * 100.0), 2) if total_possible > 0 else 0.0
+
+        # Build aggregated half-hourly profile (SP 1-48 average across selected window)
+        agg_profile = []
+        for sp in range(1, 49):
+            sp_pts = [p for p in all_points if p.settlementPeriod == sp and p.actualMW is not None and p.dayAheadForecastMW is not None]
+            if sp_pts:
+                avg_act = round(float(np.mean([p.actualMW for p in sp_pts])), 1)
+                avg_fc = round(float(np.mean([p.dayAheadForecastMW for p in sp_pts])), 1)
+                avg_err = round(avg_fc - avg_act, 1)
+            else:
+                avg_act = avg_fc = avg_err = 0.0
+
+            hours = (sp - 1) // 2
+            minutes = 30 if (sp % 2 == 0) else 0
+            agg_profile.append({
+                "settlementPeriod": sp,
+                "timeLabel": f"{hours:02d}:{minutes:02d}",
+                "avgActualMW": avg_act,
+                "avgForecastMW": avg_fc,
+                "avgErrorMW": avg_err
+            })
+
+        # Build time-series sample (daily average curve across the month)
+        time_series = []
+        for dt_summary in daily_trends:
+            time_series.append({
+                "date": dt_summary.deliveryDate,
+                "actualMW": dt_summary.avgActualMW,
+                "forecastMW": dt_summary.avgForecastMW,
+                "maeMW": dt_summary.maeMW,
+                "biasMW": dt_summary.biasMW
+            })
+
+        # Dynamic data-driven insight
+        bias_direction = "overforecasted" if overall_metrics.mbe > 0 else "underforecasted"
+        bias_implication = "creating energy deficit shortfall risk" if overall_metrics.mbe > 0 else "yielding surplus generation requiring power spill"
+        max_mae_day = max(daily_trends, key=lambda x: x.maeMW) if daily_trends else None
+        min_mae_day = min(daily_trends, key=lambda x: x.maeMW) if daily_trends else None
+
+        insight_text = (
+            f"Across {len(all_dates)} days of January 2026 evaluated at the {cutoff_time} UTC D-1 decision cutoff, "
+            f"national wind generation averaged {overall_metrics.totalActualMWh / (matched_obs * 0.5):.0f} MW outturn with an MAE of {overall_metrics.mae:.0f} MW (WAPE: {overall_metrics.wape:.1f}%). "
+            f"The forecast exhibited a signed bias of {overall_metrics.mbe:+.1f} MW ({bias_direction}), {bias_implication}. "
+            f"Peak volatility occurred on {max_mae_day.deliveryDate if max_mae_day else 'N/A'} (MAE: {max_mae_day.maeMW if max_mae_day else 0} MW), "
+            f"while {min_mae_day.deliveryDate if min_mae_day else 'N/A'} demonstrated highest stability (MAE: {min_mae_day.maeMW if min_mae_day else 0} MW)."
+        )
+
+        return OverviewResponse(
+            period={"startDate": start_date, "endDate": end_date, "cutoffTime": cutoff_time},
+            latestPublicationTime=latest_pub_time,
+            totalForecastGenerationMWh=overall_metrics.totalForecastMWh,
+            totalActualGenerationMWh=overall_metrics.totalActualMWh,
+            overallMetrics=overall_metrics,
+            matchedObservations=matched_obs,
+            totalPossibleObservations=total_possible,
+            dataCoveragePct=coverage_pct,
+            dailyErrorTrend=daily_trends,
+            timeSeriesData=time_series,
+            aggregatedProfile=agg_profile,
+            insightSummary=insight_text
+        )
+
+    @staticmethod
+    def compute_accuracy_analysis(
+        processor: DataProcessor,
+        start_date: str = "2026-01-01",
+        end_date: str = "2026-01-31",
+        cutoff_time: str = "11:00"
+    ) -> AccuracyResponse:
+        """
+        Generates full accuracy breakdown including scatter plot points, error histogram distribution,
+        and half-hourly delivery date heatmap matrix.
+        """
+        all_dates = [d for d in processor.get_available_dates() if start_date <= d <= end_date]
+        all_points: List[HalfHourlyDataPoint] = []
+        daily_mae = []
+        daily_bias = []
+        heatmap_data = []
+        scatter_data = []
+        all_errors = []
+
+        for d in all_dates:
+            points, _, _ = processor.get_day_ahead_data(d, gate_closure_time=cutoff_time)
+            all_points.extend(points)
+
+            day_valid = [p for p in points if p.actualMW is not None and p.dayAheadForecastMW is not None]
+            if day_valid:
+                errs = [p.dayAheadForecastMW - p.actualMW for p in day_valid]
+                abs_errs = [abs(e) for e in errs]
+                daily_mae.append({"date": d, "mae": round(float(np.mean(abs_errs)), 1), "rmse": round(float(np.sqrt(np.mean(np.array(errs)**2))), 1)})
+                daily_bias.append({"date": d, "bias": round(float(np.mean(errs)), 1)})
+
+            for p in points:
+                if p.actualMW is not None and p.dayAheadForecastMW is not None:
+                    err = round(p.dayAheadForecastMW - p.actualMW, 1)
+                    abs_err = round(abs(err), 1)
+                    all_errors.append(err)
+
+                    # Heatmap cell
+                    heatmap_data.append({
+                        "date": p.settlementDate,
+                        "sp": p.settlementPeriod,
+                        "time": p.timeLabel or f"SP {p.settlementPeriod}",
+                        "actual": p.actualMW,
+                        "forecast": p.dayAheadForecastMW,
+                        "error": err,
+                        "absError": abs_err
+                    })
+
+                    # Scatter sample: take SP 3, 10, 18, 24, 32, 38, 44 (stratified sample across day for performance)
+                    if p.settlementPeriod in [2, 8, 14, 20, 26, 32, 38, 44]:
+                        scatter_data.append({
+                            "actualMW": p.actualMW,
+                            "forecastMW": p.dayAheadForecastMW,
+                            "errorMW": err,
+                            "sp": p.settlementPeriod,
+                            "date": p.settlementDate
+                        })
+
+        overall_metrics = MetricsEngine.compute_accuracy_metrics(all_points)
+        matched_obs = overall_metrics.totalPeriods
+        total_obs = len(all_dates) * 48
+        coverage_pct = round((matched_obs / total_obs * 100.0), 2) if total_obs > 0 else 0.0
+
+        # Build histogram of signed errors (15 bins)
+        error_dist = []
+        if all_errors:
+            err_arr = np.array(all_errors)
+            min_e = float(np.percentile(err_arr, 1))
+            max_e = float(np.percentile(err_arr, 99))
+            counts, bin_edges = np.histogram(err_arr, bins=15, range=(min_e, max_e))
+            total_c = len(all_errors)
+            for i in range(len(counts)):
+                b_start = round(bin_edges[i], 0)
+                b_end = round(bin_edges[i+1], 0)
+                mid = round((b_start + b_end) / 2.0, 0)
+                error_dist.append({
+                    "binRange": f"{b_start:+.0f} to {b_end:+.0f} MW",
+                    "binCenter": mid,
+                    "count": int(counts[i]),
+                    "frequencyPct": round((counts[i] / total_c) * 100.0, 2)
+                })
+
+        diurnal = MetricsEngine.compute_diurnal_profile(processor, gate_closure_time=cutoff_time)
+
+        return AccuracyResponse(
+            startDate=start_date,
+            endDate=end_date,
+            cutoffTime=cutoff_time,
+            overallMetrics=overall_metrics,
+            dailyMaeTrend=daily_mae,
+            dailyBiasTrend=daily_bias,
+            scatterData=scatter_data,
+            errorDistribution=error_dist,
+            heatmapData=heatmap_data,
+            diurnalStats=diurnal,
+            matchedObservations=matched_obs,
+            totalObservations=total_obs,
+            dataCoveragePct=coverage_pct
         )

@@ -12,6 +12,7 @@ class HalfHourlyDataPoint(BaseModel):
     errorMW: Optional[float] = None  # forecast - actual (positive = overforecast/shortfall risk)
     absErrorMW: Optional[float] = None
     errorPct: Optional[float] = None
+    timeLabel: Optional[str] = None
     thermalBaseMW: Optional[float] = None
     thermalBufferMW: Optional[float] = None
     totalThermalMW: Optional[float] = None
@@ -121,3 +122,69 @@ class ForecastEvolutionResponse(BaseModel):
     settlementPeriod: int
     actualMW: Optional[float]
     evolution: List[ForecastHorizonPoint]
+
+# --- WindIQ Dedicated Schemas for Prompts 6, 7, 8, 10 ---
+
+class OverviewResponse(BaseModel):
+    period: Dict[str, Any]
+    latestPublicationTime: Optional[str]
+    totalForecastGenerationMWh: float
+    totalActualGenerationMWh: float
+    overallMetrics: AccuracyMetrics
+    matchedObservations: int
+    totalPossibleObservations: int
+    dataCoveragePct: float
+    dailyErrorTrend: List[DailySummary]
+    timeSeriesData: List[Dict[str, Any]]
+    aggregatedProfile: List[Dict[str, Any]]
+    insightSummary: str
+
+class ForecastsResponse(BaseModel):
+    deliveryDate: str
+    decisionDate: str
+    cutoffTime: str
+    cutoffTimestamp: str
+    timezone: str = "UTC (GMT)"
+    metrics: AccuracyMetrics
+    halfHourlyData: List[HalfHourlyDataPoint]
+    availableDates: List[str]
+    availableCutoffs: List[str]
+
+class VintagePoint(BaseModel):
+    settlementPeriod: int
+    startTime: str
+    forecastMW: float
+
+class VintageRun(BaseModel):
+    vintageId: str
+    publishTime: str
+    label: str
+    leadHoursAvg: float
+    points: List[VintagePoint]
+
+class VintagesResponse(BaseModel):
+    deliveryDate: str
+    actualCurve: List[Dict[str, Any]]
+    availableVintages: List[VintageRun]
+
+class AccuracyResponse(BaseModel):
+    startDate: str
+    endDate: str
+    cutoffTime: str
+    overallMetrics: AccuracyMetrics
+    dailyMaeTrend: List[Dict[str, Any]]
+    dailyBiasTrend: List[Dict[str, Any]]
+    scatterData: List[Dict[str, Any]]
+    errorDistribution: List[Dict[str, Any]]
+    heatmapData: List[Dict[str, Any]]
+    diurnalStats: List[DiurnalPeriodStat]
+    matchedObservations: int
+    totalObservations: int
+    dataCoveragePct: float
+
+class RefreshResponse(BaseModel):
+    status: str
+    message: str
+    refreshedAt: str
+    actualPeriodsCount: int
+    forecastRecordsCount: int
