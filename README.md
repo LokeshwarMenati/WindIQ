@@ -5,10 +5,16 @@
 [![React](https://img.shields.io/badge/React-18.3-61dafb.svg)](https://react.dev/)
 [![Vite](https://img.shields.io/badge/Vite-5.4-646cff.svg)](https://vitejs.dev/)
 [![Tailwind CSS](https://img.shields.io/badge/TailwindCSS-3.4-38bdf8.svg)](https://tailwindcss.com/)
+[![Vercel Deployment](https://img.shields.io/badge/Vercel-Live_Production-00dfa2.svg?logo=vercel)](https://wind-iq.vercel.app/)
 [![Docker](https://img.shields.io/badge/Docker-Ready-2496ed.svg)](https://www.docker.com/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 
 An institutional-grade decision and quantitative evaluation platform engineered specifically for **UK electricity utility day-ahead energy procurement teams** trading in Great Britain's wholesale power market (EPEX SPOT / Nord Pool GB).
+
+> 🌐 **Live Production Application**: [https://wind-iq.vercel.app/](https://wind-iq.vercel.app/)  
+> 📦 **GitHub Repository**: [https://github.com/LokeshwarMenati/WindIQ](https://github.com/LokeshwarMenati/WindIQ)  
+> 📑 **Interactive API Docs (Swagger)**: [https://wind-iq.vercel.app/docs](https://wind-iq.vercel.app/docs)  
+> 📊 **Historical Period Analyzed**: January 2026 (1,488 GB settlement periods) + Nov/Dec 2025 Multi-Month Financial Calendar
 
 ---
 
@@ -320,18 +326,16 @@ docker-compose down
 
 ## 13. Production Deployment Guide
 
-### Frontend Deployment (Vercel)
-1. Link your GitHub repository to [Vercel](https://vercel.com).
-2. Configure **Root Directory** as `frontend`.
-3. Set Environment Variable:
-   - `VITE_API_URL`: Your deployed backend URL (e.g. `https://windiq-backend.herokuapp.com`).
-4. Vercel automatically deploys with single-page app rewrite support via `vercel.json`.
+### Live Production Deployment
+- **Live Portal**: [https://wind-iq.vercel.app/](https://wind-iq.vercel.app/)
+- **Live API Endpoint**: [https://wind-iq.vercel.app/api/health](https://wind-iq.vercel.app/api/health)
+- **Live Swagger Documentation**: [https://wind-iq.vercel.app/docs](https://wind-iq.vercel.app/docs)
 
-### Backend Deployment (Render / Heroku / Railway)
-1. Deploy from the `backend` directory.
-2. Build Command: `pip install -r requirements.txt`
-3. Start Command: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
-4. Health Check Path: `/api/health`
+### Deployment Architecture on Vercel
+The application is configured as a full-stack monorepo deployed on Vercel:
+1. **Frontend**: React 18 + Vite SPA built to `frontend/dist` and delivered via Vercel Edge Network with client-side SPA routing rewrites.
+2. **Serverless Backend**: Python 3.12 FastAPI ASGI app running via `api/index.py` serverless function. Requests to `/api/*`, `/docs`, and `/openapi.json` are dynamically routed to the serverless backend.
+3. **Data Layer**: High-density verified Elexon BMRS datasets for January 2026 are packaged directly in `backend/data/` for sub-millisecond in-memory response times.
 
 ---
 

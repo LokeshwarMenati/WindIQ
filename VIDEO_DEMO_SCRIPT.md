@@ -16,7 +16,7 @@ This document provides a **complete, timed, word-for-word presentation script** 
 **Goal**: Impress them with domain expertise, financial ROI, and the platform's decision power.
 
 ### [0:00 - 1:00] Executive Introduction & Market Context
-- **Screen**: Start on the WindIQ home dashboard (`http://localhost:5173/`). Have the hero banner with animated wind streamlines, KPI cards, and decision cutoff pill in view.
+- **Screen**: Start on the live WindIQ production deployment (`https://wind-iq.vercel.app/`) or local (`http://localhost:5173/`). Have the hero banner with animated wind streamlines, KPI cards, and decision cutoff pill in view.
 - **Speaker**:
   > *"Hello team. Today, I am proud to present the culmination of our pilot project: **WindIQ**, an institutional decision-support and forecast analytics platform engineered specifically for your Day-Ahead wholesale power purchasing desk in Great Britain's wholesale electricity market.*
   >
@@ -121,7 +121,7 @@ This document provides a **complete, timed, word-for-word presentation script** 
   > *- We test zero lookahead bias enforcement, ensuring no forecasts published after gate closure are ever served.*
   > *- We test end-to-end endpoint serialization for Overview, Forecast Explorer, Accuracy Analysis, and Vintages.*
   >
-  > *For containerization, we provided a root `docker-compose.yml` that boots both the Python backend and multi-stage Nginx frontend in isolated containers with a single command: `docker-compose up --build`. The application is also pre-configured with `Procfile` for Heroku and `vercel.json` for Vercel."*
+  > *For deployment, the application is live in production on Vercel at `https://wind-iq.vercel.app/` with seamless serverless ASGI FastAPI endpoints and SPA routing. We also provided a root `docker-compose.yml` that boots both the Python backend and multi-stage Nginx frontend in isolated containers with a single command: `docker-compose up --build`."*
 
 ### [9:00 - 10:00] Development Practices, Data Provenance & AI Attribution
 - **Screen**: Show `README.md` and the **Tech Lead Review** modal Topic 5.
