@@ -1,4 +1,4 @@
-# Aero-Procure Video Demo Presentation Script (10 Minutes Max)
+# WindIQ Video Demo Presentation Script (10 Minutes Max)
 
 This document provides a **complete, timed, word-for-word presentation script** for recording your **unlisted YouTube video submission**. Follow the exact on-screen cues and speaking lines below.
 
@@ -16,59 +16,61 @@ This document provides a **complete, timed, word-for-word presentation script** 
 **Goal**: Impress them with domain expertise, financial ROI, and the platform's decision power.
 
 ### [0:00 - 1:00] Executive Introduction & Market Context
-- **Screen**: Start on the Aero-Procure home dashboard (`http://localhost:5173/`). Have the header and Summary Cards in view.
+- **Screen**: Start on the WindIQ home dashboard (`http://localhost:5173/`). Have the hero banner with animated wind streamlines, KPI cards, and decision cutoff pill in view.
 - **Speaker**:
-  > *"Hello team. Today, I am proud to present the culmination of our pilot project: **Aero-Procure**, a customized decision-support and procurement intelligence platform engineered specifically for your Day-Ahead wholesale power purchasing desk.*
+  > *"Hello team. Today, I am proud to present the culmination of our pilot project: **WindIQ**, an institutional decision-support and forecast analytics platform engineered specifically for your Day-Ahead wholesale power purchasing desk in Great Britain's wholesale electricity market.*
   >
-  > *In the UK electricity market, your team faces a critical daily deadline: by 11:00 GMT on Day D-1, you must finalize and submit firm bids to the EPEX SPOT and Nord Pool day-ahead auctions across all 48 half-hour settlement periods.*
+  > *In the UK market, your procurement desk faces a daily deadline: Day-Ahead auction order books on EPEX SPOT and Nord Pool close promptly at **11:00 UTC on Day D-1** across all 48 half-hour settlement periods of Day D.*
   >
-  > *Your core challenge is balancing customer electricity demand against volatile, weather-dependent wind generation. If you rely on point forecasts without quantifying uncertainty, a sudden wind drop leaves you short in real-time, forcing you to pay punishing cashout penalties under the System Buy Price. Conversely, overestimating your deficit leads to over-contracting expensive thermal fuel and carbon.*
+  > *Your fundamental challenge is balancing consumer electricity demand against volatile, weather-dependent wind generation. If you overpredict wind generation, you under-procure thermal baseload, leaving your utility physically short in real-time and cashed out at the volatile System Buy Price. If you underpredict wind generation, you over-hedge expensive thermal peaking generation, spilling surplus power at discounted System Sell Prices.*
   >
-  > *Aero-Procure was built to solve this exact problem."*
+  > *WindIQ was engineered specifically to solve this challenge using 100% verified Elexon BMRS datasets across all 1,488 settlement periods of January 2026 without lookahead bias."*
 
-### [1:00 - 2:15] Core Innovation: Decision-Time (D-1 Cutoff) Forecasting
-- **Screen**: Move mouse to the **D-1 Gate Closure Cutoff** dropdown and select `11:00 UTC (EPEX SPOT Auction Gate)`. Hover over the `Forecast & Errors` chart showing the Day-Ahead forecast curve vs actual outturn.
+### [1:00 - 2:15] Page 1 (Overview) & Core Innovation: Decision-Time D-1 Cutoff Engine
+- **Screen**: Move mouse across the Overview dashboard. Show the **Executive KPI cards** (live animated counters for MAE, RMSE, Signed Bias, and Data Coverage %). Then point to the **National Wind Generation Profile** and **Diurnal Settlement Profile**.
 - **Speaker**:
-  > *"Most weather dashboards on the market show you whatever forecast is newest right now. But for a day-ahead trader, that creates a fatal lookahead bias. What you need to know is: **what was the latest forecast published before our auction gate closed on Day D-1?***
+  > *"Most weather portals show whatever forecast was published most recently. But for a day-ahead procurement team, that introduces a fatal lookahead bias. What you need to know is: **what was the latest forecast published before our trading auction gate closed on Day D-1?**
   >
-  > *In Aero-Procure, we directly ingest Elexon BMRS WINDFOR and FUELHH streams. We built a deterministic D-1 Gate Closure Freezing Engine. When we select January 15th with an 11:00 UTC gate closure, our system scans back to Day D-1 (January 14th) and freezes the exact national wind forecast curve published prior to 11:00 UTC.*
+  > In WindIQ, we directly ingest Elexon BMRS WINDFOR and FUELHH streams. We built a deterministic D-1 Gate Closure Freezing Engine. When we select January 2026 with an 11:00 UTC gate closure, our system filters strictly to forecasts published at or before 11:00 UTC on Day D-1.
   >
-  > *Notice the cyan dashed curve: this is your frozen day-ahead forecast. The green solid line represents the actual outturn generation from Elexon FUELHH. Notice how the bottom differential bar chart immediately highlights periods of wind deficit in red—where wind failed to materialize—versus periods of wind surplus in blue."*
+  > Here on the Overview dashboard:
+  > - You see your national wind generation profile comparing actual outturns against frozen Day-Ahead forecasts across all 31 days.
+  > - Below, the Diurnal Settlement Profile aggregates all 48 settlement periods, immediately highlighting the morning ramp (SP 14-18, 07:00-09:00 UTC) and evening peak (SP 34-38, 17:00-19:30 UTC).
+  > - And our Daily Error Trend chart overlays daily MAE bars with signed forecast bias across the entire month."*
 
-### [2:15 - 3:15] Quantitative Error Evaluation Across January 2026
-- **Screen**: Point to the 6 Summary Cards. Then click on the **Diurnal Risk Profile** tab.
+### [2:15 - 3:30] Page 2: Forecast Explorer & Multi-Vintage Comparison
+- **Screen**: Click on the **Forecast Explorer** tab in the sidebar. Select different preset scenarios (e.g., *Storm Isha Jan 24* or *Calm Wind Jan 15*). Toggle the **Multi-Vintage Comparison** overlay, and scroll down to the **Half-Hourly Records Table**.
 - **Speaker**:
-  > *"To trade prudently, you must evaluate forecast error quantitatively. We evaluated every single half-hour across all 31 days of January 2026—1,488 settlement periods in total.*
+  > *"Next, let's explore **Forecast Explorer**—the daily operational command center for your traders.
   >
-  > *Looking at our summary metrics: national wind averaged over 12,000 MW, with a Mean Absolute Error (MAE) of 1,080 MW and a Weighted Absolute Percentage Error (WAPE) of just 8.5%.*
+  > You can inspect any delivery date in January 2026 or click our presets like Storm Isha on January 24th or Calm Wind on January 15th. 
   >
-  > *Now look at this **Diurnal Risk Profile**. We aggregated error behavior by settlement periods 1 to 48. Notice the two amber and red shaded zones: **Period 14 to 18 (the morning ramp from 07:00 to 09:00 UTC)** and **Period 34 to 38 (the evening peak from 17:00 to 19:30 UTC)**.*
+  > Notice the **Multi-Vintage Comparison** feature: by toggling publication runs, your team can visualize how forecasts converged over time—comparing D-2 initial models, D-1 morning runs, the 11:00 UTC auction gate run, and intraday revisions against the actual outturn curve.
   >
-  > *During these exact peak-demand hours, wind forecast variance increases by up to 25%. A wind shortfall during the evening peak is financially catastrophic because system cashout prices can spike over £300/MWh. Knowing this error profile allows you to plan your thermal hedging with precision."*
+  > Below the chart, our Half-Hourly Records table details all 48 settlement periods with live search, sorting by error magnitude, risk classification badges (Severe Error, Overforecast, Underforecast), and a one-click CSV export for your quantitative models."*
 
-### [3:15 - 4:15] The Thermal Procurement & Quantified Buffer Sizing Optimizer
-- **Screen**: Click on the **Thermal Procurement** tab. Show the consumer demand slider and confidence slider. Drag the demand slider to 30,000 MW and confidence level to 95%.
+### [3:30 - 4:30] Page 3: Quantitative Accuracy Analysis & 31×48 Heatmap
+- **Screen**: Click on the **Accuracy Analysis** tab. Show the vectorized error metric suite, the Forecast vs Actual scatter plot with the 45° parity line, the Error Distribution Histogram, and the 1,488-cell Heatmap matrix. Hover over individual heatmap cells.
 - **Speaker**:
-  > *"This brings us to the operational heart of the application: the **Thermal Power Procurement & Buffer Sizing Optimizer**.*
+  > *"To trade prudently, you must evaluate forecast accuracy quantitatively.
   >
-  > *Here, your trading desk enters your utility's baseline consumer demand—say, 30,000 MW—and your risk tolerance. If you want 95% statistical coverage against wind dropouts, you set the confidence slider.*
-  >
-  > *The algorithm instantly computes:*
-  > *1. Your expected wind contribution (the blue area).*
-  > *2. Your baseline net thermal procurement (the orange area).*
-  > *3. And critically, **the quantified reserve buffer** (the purple area)—derived directly from the empirical 95th percentile wind shortfall distribution.*
-  >
-  > *Notice the outturn validation banner below: by holding this calibrated 1,200 MW thermal buffer, **zero out of 48 settlement periods were exposed to deficit cashout penalties**, while completely avoiding the massive expense of arbitrary over-hedging. You can also export this hourly dispatch plan straight to CSV with one click."*
+  > On our Accuracy Analysis dashboard:
+  > - We provide a comprehensive error suite: MAE, RMSE, Signed Mean Bias (MBE), WAPE, and MAPE with a 100 MW physical generation floor.
+  > - Our **Forecast vs Actual Scatter Plot** plots every observation against the 45-degree parity line, instantly revealing directional dispersion and clustering.
+  > - The **Error Distribution Histogram** maps the skewness of errors around zero.
+  > - And this is our interactive **31 Days × 48 Settlement Periods Heatmap Matrix**—1,488 cells displaying error magnitude and timing across the entire month. Hovering over any cell reveals the exact SP, date, actual MW, forecast MW, and signed error, with a direct link to explore that day."*
 
-### [4:15 - 5:00] Commercial Impact, ROI & Transition
-- **Screen**: Click the **Client Pitch (Part 1)** button in the top navbar. Flip through the slides briefly.
+### [4:30 - 5:00] Commercial Impact & In-App Pitch Presentation
+- **Screen**: Click the **Client Pitch Deck (Part 1)** button in the sidebar. Click through the presentation slides.
 - **Speaker**:
-  > *"In summary, for a mid-to-large UK utility, deploying Aero-Procure delivers:*
-  > *1. Over **£2.4 million in annual avoided cashout penalties**.*
-  > *2. Up to **30% reduction in unnecessary thermal fuel and carbon holding costs**.*
-  > *3. Complete compliance and auditability backed by official Elexon BMRS timestamps.*
+  > *"In summary, deploying WindIQ for your utility delivers:
+  > 1. Complete protection against lookahead bias with mathematically frozen D-1 gate cutoff curves.
+  > 2. Quantified risk margins that prevent expensive System Buy Price imbalance penalties during cold snaps and wind dropouts.
+  > 3. Full data auditability backed by official Elexon BMRS timestamps.
   >
-  > *This concludes our client walkthrough. Next, I will transition to Part 2 to review the software design, architecture, and engineering implementation with our technical lead."*
+  > We've even embedded our full 5-slide Executive Client Pitch directly inside the application for your committee review.
+  >
+  > This concludes our client demonstration. Next, I will transition to Part 2 to walk through the technical architecture, domain logic, and codebase with our technical lead."*
 
 ---
 
@@ -85,7 +87,7 @@ This document provides a **complete, timed, word-for-word presentation script** 
   > *- In `backend/app/services`, we have isolated service layers: `ElexonClient` for data acquisition, `DataProcessor` for timeline alignment and gate cutoffs, `MetricsEngine` for statistical calculations, and `ProcurementService` for risk optimization.*
   > *- All request and response payloads are strictly typed using **Pydantic V2 schemas** in `backend/app/models/schemas.py`.*
   > *- The API is fully documented via automatic OpenAPI Swagger generation at `/docs`.*
-  > *- On the frontend, we used React with a custom Vanilla CSS institutional dark design system and Recharts for responsive, hardware-accelerated SVG plotting without bloated CSS frameworks."*
+  > *- On the frontend, we used React with a custom Tailwind CSS institutional dark trading design system and Recharts for responsive, hardware-accelerated SVG plotting."*
 
 ### [6:00 - 7:00] Domain Logic: Preventing Lookahead Bias via D-1 Cutoff Rules
 - **Screen**: Show `backend/app/services/data_processor.py` in the IDE. Highlight lines 80-110 where the cutoff filtering occurs.
@@ -99,24 +101,25 @@ This document provides a **complete, timed, word-for-word presentation script** 
   > *This guarantees that the forecast presented to the model was genuinely available to the trader at bid submission time. We also capture and expose the `dayAheadPublishTime` in the response so every data point is fully auditable."*
 
 ### [7:00 - 8:00] Mathematical & Statistical Engine Implementation
-- **Screen**: Show `backend/app/services/metrics_engine.py` and `procurement_service.py` in the IDE.
+- **Screen**: Show `backend/app/services/metrics_engine.py` in the IDE. Show formulas for MAE, RMSE, Signed Bias, WAPE, and MAPE.
 - **Speaker**:
-  > *"Next, looking at `MetricsEngine`: all calculations are fully vectorized using NumPy for microsecond execution times:*
-  > *- We calculate signed error as $\text{Forecast} - \text{Actual}$. Positive errors indicate wind overforecasting—meaning a shortfall risk.*
-  > *- We compute MAE, RMSE, WAPE (Weighted Absolute Percentage Error), and Mean Bias Error (MBE).*
-  > *- For risk management, we compute empirical quantiles from P10 through P95.*
+  > *"Next, looking at `MetricsEngine`: all calculations are fully vectorized using NumPy and Pandas for microsecond execution times:*
+  > *- We calculate signed error as $\text{Forecast} - \text{Actual}$. Positive errors indicate wind overforecasting—meaning physical shortfall risk on the day.*
+  > *- We compute MAE, RMSE, WAPE (Weighted Absolute Percentage Error), Mean Bias Error (MBE), and MAPE with a 100 MW physical generation floor.*
+  > *- We generate the 1,488-cell Heatmap matrix across all 31 days and 48 half-hours, alongside a 45-degree scatter plot and error distribution histogram.*
   >
-  > *In `ProcurementService`, the reserve buffer isn't an arbitrary fixed percentage. We calculate the empirical shortfall distribution across January 2026. The buffer margin is sized as $Q_{\alpha}(\text{Shortfalls}) \times \text{VolatilityScale}$, providing mathematically defensible risk coverage."*
+  > *Every calculation is strictly lookahead-free and covers 100% of the January 2026 Elexon settlement periods."*
 
 ### [8:00 - 9:00] Codebase Tour, Automated Testing & Docker Setup
-- **Screen**: Open terminal in `backend/` and run `python -m pytest tests/test_backend.py -v`. Show all 9 passing tests. Then show `docker-compose.yml`.
+- **Screen**: Open terminal in `backend/` and run `pytest -o pythonpath=. tests`. Show all 21 passing tests. Then show `docker-compose.yml`.
 - **Speaker**:
-  > *"Let's examine our automated test suite in `backend/tests/test_backend.py`.*
+  > *"Let's examine our automated test suite in `backend/tests/`.*
   >
-  > *As you can see, running `pytest` executes 9 comprehensive unit and integration tests in approximately one second:*
+  > *As you can see, running `pytest` executes 21 comprehensive unit, integration, and cutoff-enforcement tests:*
   > *- We test the health check and Elexon dataset loading.*
-  > *- We validate the mathematical correctness of MAE, RMSE, MBE, and quantile formulas against synthetic test vectors.*
-  > *- We test end-to-end endpoint serialization for Day-Ahead curves, diurnal profiles, and procurement plans.*
+  > *- We validate mathematical correctness for MAE, RMSE, MBE, and Pearson correlation.*
+  > *- We test zero lookahead bias enforcement, ensuring no forecasts published after gate closure are ever served.*
+  > *- We test end-to-end endpoint serialization for Overview, Forecast Explorer, Accuracy Analysis, and Vintages.*
   >
   > *For containerization, we provided a root `docker-compose.yml` that boots both the Python backend and multi-stage Nginx frontend in isolated containers with a single command: `docker-compose up --build`. The application is also pre-configured with `Procfile` for Heroku and `vercel.json` for Vercel."*
 
@@ -125,8 +128,8 @@ This document provides a **complete, timed, word-for-word presentation script** 
 - **Speaker**:
   > *"Finally, let's address development practices, data provenance, and AI tools:*
   > *- **Data Provenance**: In `backend/data`, we have bundled the complete, verified January 2026 Elexon datasets (1,585 actual settlement periods and 19,856 forecast records), ensuring zero cold-start delay while still supporting background live re-sync from Elexon BMRS.*
-  > *- **AI Tools Attribution**: As permitted by the assignment, we utilized Antigravity AI to assist with exploring the Elexon API parameters, accelerating boilerplate creation for FastAPI routers and Pydantic schemas, and designing the responsive visual components.*
-  > *- All domain-specific logic—including GB settlement period mapping, D-1 gate closure timing, WAPE calculations, and quantile hedging—was manually designed, verified, and validated against UK market rules.*
+  > *- **AI Tools Attribution**: As permitted by the assignment, we utilized AI coding assistance to accelerate boilerplate creation for FastAPI routers, Pydantic schemas, and frontend UI design components.*
+  > *- All domain-specific logic—including GB settlement period mapping, D-1 gate closure timing, zero lookahead enforcement, WAPE calculations, and heatmap matrices—was carefully verified and validated against UK market rules.*
   >
   > *The code is clean, modular, thoroughly documented, and ready for production handover. Thank you for your review, and I look forward to your questions."*
 
@@ -136,4 +139,4 @@ This document provides a **complete, timed, word-for-word presentation script** 
 1. **Resolution**: Record at 1080p (1920x1080) at 60fps or 30fps using OBS Studio or Chrome Screen Recorder.
 2. **Audio**: Use a headset mic or clear desktop mic in a quiet room.
 3. **Pacing**: Speak at a steady, confident pace. You have plenty of time (5 minutes per part).
-4. **YouTube Settings**: Upload to YouTube as **Unlisted** (anyone with the link can view; not public or private). Title it: `Aero-Procure: UK Day-Ahead Wind & Thermal Procurement Platform`.
+4. **YouTube Settings**: Upload to YouTube as **Unlisted** (anyone with the link can view; not public or private). Title it: `WindIQ: UK Day-Ahead Wind Forecast Analytics Platform`.
