@@ -446,7 +446,7 @@ export default function OverviewPage({
                 dataKey="deliveryDate" 
                 stroke="#64748b" 
                 tick={{ fontSize: 10 }}
-                tickFormatter={(d) => d.slice(8)} // display '01', '02', ...
+                tickFormatter={(d) => (typeof d === 'string' && d.length >= 10 ? d.slice(8) : (d || ''))} // display '01', '02', ...
                 label={{ value: 'January 2026 (Day of Month)', position: 'insideBottom', offset: -12, fill: '#64748b', fontSize: 11 }}
               />
               <YAxis 

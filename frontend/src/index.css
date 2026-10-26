@@ -1,3 +1,7 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 /* UK Day-Ahead Wind Forecast & Procurement Platform - Institutional Design System */
 
 :root {

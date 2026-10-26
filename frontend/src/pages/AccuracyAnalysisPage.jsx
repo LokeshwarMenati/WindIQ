@@ -82,26 +82,57 @@ export default function AccuracyAnalysisPage({
 
   const metrics = accuracyData?.overallMetrics;
   const scatterPoints = accuracyData?.scatterData || [];
-  const dailyMae = accuracyData?.dailyMaeTrend || [];
   const dailyBias = accuracyData?.dailyBiasTrend || [];
   const errorDist = accuracyData?.errorDistribution || [];
   const heatmapCells = accuracyData?.heatmapData || [];
+
+  // Normalised daily MAE & Bias trend
+  const dailyMae = useMemo(() => {
+    if (!accuracyData?.dailyMaeTrend) return [];
+    const biasMap = new Map((accuracyData.dailyBiasTrend || []).map(b => [b.deliveryDate || b.date, b.biasMW ?? b.bias]));
+    return accuracyData.dailyMaeTrend.map(d => {
+      const dateStr = d.deliveryDate || d.date || '';
+      return {
+        ...d,
+        deliveryDate: dateStr,
+        date: dateStr,
+        maeMW: d.maeMW ?? d.mae ?? 0,
+        rmseMW: d.rmseMW ?? d.rmse ?? 0,
+        biasMW: d.biasMW ?? d.bias ?? (biasMap.get(dateStr) || 0)
+      };
+    });
+  }, [accuracyData]);
 
   // Table rows prepared from heatmap / scatter dataset
   const tableRows = useMemo(() => {
     if (!heatmapCells.length) return [];
     
-    let rows = heatmapCells.map(c => ({
-      ...c,
-      absErrorMW: Math.abs(c.errorMW || 0),
-      errorPct: c.actualMW > 100 ? (((c.errorMW || 0) / c.actualMW) * 100) : null
-    }));
+    let rows = heatmapCells.map(c => {
+      const deliveryDate = c.deliveryDate || c.date || '';
+      const settlementPeriod = c.settlementPeriod || c.sp || 0;
+      const actualMW = c.actualMW ?? c.actual ?? 0;
+      const forecastMW = c.forecastMW ?? c.dayAheadForecastMW ?? c.forecast ?? 0;
+      const errorMW = c.errorMW ?? c.error ?? (forecastMW - actualMW);
+      const absErrorMW = c.absErrorMW ?? c.absError ?? Math.abs(errorMW);
+      return {
+        ...c,
+        deliveryDate,
+        date: deliveryDate,
+        settlementPeriod,
+        sp: settlementPeriod,
+        actualMW,
+        forecastMW,
+        errorMW,
+        absErrorMW,
+        errorPct: actualMW > 100 ? ((errorMW / actualMW) * 100) : null
+      };
+    });
 
     if (searchTerm) {
       const q = searchTerm.toLowerCase();
       rows = rows.filter(r => 
-        r.deliveryDate.includes(q) || 
-        r.settlementPeriod.toString().includes(q)
+        (r.deliveryDate && r.deliveryDate.toLowerCase().includes(q)) || 
+        (r.settlementPeriod && r.settlementPeriod.toString().includes(q))
       );
     }
 
@@ -162,7 +193,7 @@ export default function AccuracyAnalysisPage({
 
   // Heatmap rendering helpers (31 days x 48 SPs)
   const heatmapDates = useMemo(() => {
-    const dates = Array.from(new Set(heatmapCells.map(c => c.deliveryDate))).sort();
+    const dates = Array.from(new Set(heatmapCells.map(c => c.deliveryDate || c.date).filter(Boolean))).sort();
     return dates;
   }, [heatmapCells]);
 
@@ -330,7 +361,7 @@ export default function AccuracyAnalysisPage({
                   dataKey="deliveryDate" 
                   stroke="#64748b" 
                   tick={{ fontSize: 10 }}
-                  tickFormatter={(d) => d.slice(8)}
+                  tickFormatter={(d) => (typeof d === 'string' && d.length >= 10 ? d.slice(8) : (d || ''))}
                   label={{ value: 'Day of January 2026', position: 'insideBottom', offset: -12, fill: '#64748b', fontSize: 11 }}
                 />
                 <YAxis stroke="#64748b" tick={{ fontSize: 11 }} />
@@ -520,24 +551,31 @@ export default function AccuracyAnalysisPage({
 
             {/* Days Rows */}
             {heatmapDates.map(date => {
-              const dayCells = heatmapCells.filter(c => c.deliveryDate === date);
+              const dayCells = heatmapCells.filter(c => (c.deliveryDate || c.date) === date);
 
               return (
                 <div key={date} className="flex items-center gap-1">
                   <span className="w-16 shrink-0 text-[10px] text-slate-400 font-mono">
-                    {date.slice(5)}
+                    {typeof date === 'string' && date.length >= 5 ? date.slice(5) : (date || '')}
                   </span>
                   {Array.from({ length: 48 }, (_, i) => i + 1).map(sp => {
-                    const cell = dayCells.find(c => c.settlementPeriod === sp);
-                    const error = cell?.errorMW;
+                    const cell = dayCells.find(c => (c.settlementPeriod || c.sp) === sp);
+                    const error = cell?.errorMW ?? cell?.error;
                     const bg = getHeatmapColor(error);
 
                     return (
                       <div
                         key={sp}
-                        onMouseEnter={() => setSelectedHeatmapCell(cell || { deliveryDate: date, settlementPeriod: sp, errorMW: 0 })}
+                        onMouseEnter={() => setSelectedHeatmapCell(cell ? {
+                          ...cell,
+                          deliveryDate: cell.deliveryDate || cell.date || date,
+                          settlementPeriod: cell.settlementPeriod || cell.sp || sp,
+                          actualMW: cell.actualMW ?? cell.actual,
+                          forecastMW: cell.forecastMW ?? cell.dayAheadForecastMW ?? cell.forecast,
+                          errorMW: error
+                        } : { deliveryDate: date, settlementPeriod: sp, errorMW: 0 })}
                         onClick={() => onNavigateToExplorer?.(date)}
-                        title={`${date} SP ${sp}: Error ${error ? (error > 0 ? '+' : '') + error.toFixed(0) + ' MW' : 'N/A'}`}
+                        title={`${date} SP ${sp}: Error ${error !== undefined && error !== null ? (error > 0 ? '+' : '') + Number(error).toFixed(0) + ' MW' : 'N/A'}`}
                         className="flex-1 h-3.5 rounded-[2px] transition-transform hover:scale-125 cursor-pointer shadow-sm"
                         style={{ backgroundColor: bg }}
                       />

@@ -327,8 +327,25 @@ class MetricsEngine:
             if day_valid:
                 errs = [p.dayAheadForecastMW - p.actualMW for p in day_valid]
                 abs_errs = [abs(e) for e in errs]
-                daily_mae.append({"date": d, "mae": round(float(np.mean(abs_errs)), 1), "rmse": round(float(np.sqrt(np.mean(np.array(errs)**2))), 1)})
-                daily_bias.append({"date": d, "bias": round(float(np.mean(errs)), 1)})
+                mae_val = round(float(np.mean(abs_errs)), 1)
+                rmse_val = round(float(np.sqrt(np.mean(np.array(errs)**2))), 1)
+                bias_val = round(float(np.mean(errs)), 1)
+                daily_mae.append({
+                    "date": d,
+                    "deliveryDate": d,
+                    "mae": mae_val,
+                    "maeMW": mae_val,
+                    "rmse": rmse_val,
+                    "rmseMW": rmse_val,
+                    "bias": bias_val,
+                    "biasMW": bias_val
+                })
+                daily_bias.append({
+                    "date": d,
+                    "deliveryDate": d,
+                    "bias": bias_val,
+                    "biasMW": bias_val
+                })
 
             for p in points:
                 if p.actualMW is not None and p.dayAheadForecastMW is not None:
@@ -336,15 +353,23 @@ class MetricsEngine:
                     abs_err = round(abs(err), 1)
                     all_errors.append(err)
 
-                    # Heatmap cell
+                    # Heatmap cell with dual-compatibility keys
                     heatmap_data.append({
                         "date": p.settlementDate,
+                        "deliveryDate": p.settlementDate,
                         "sp": p.settlementPeriod,
+                        "settlementPeriod": p.settlementPeriod,
                         "time": p.timeLabel or f"SP {p.settlementPeriod}",
+                        "timeLabel": p.timeLabel or f"SP {p.settlementPeriod}",
                         "actual": p.actualMW,
+                        "actualMW": p.actualMW,
                         "forecast": p.dayAheadForecastMW,
+                        "forecastMW": p.dayAheadForecastMW,
+                        "dayAheadForecastMW": p.dayAheadForecastMW,
                         "error": err,
-                        "absError": abs_err
+                        "errorMW": err,
+                        "absError": abs_err,
+                        "absErrorMW": abs_err
                     })
 
                     # Scatter sample: take SP 3, 10, 18, 24, 32, 38, 44 (stratified sample across day for performance)
