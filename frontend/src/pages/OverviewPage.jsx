@@ -23,7 +23,9 @@ import {
   Sparkles,
   Info,
   Calendar,
-  Compass
+  Compass,
+  Coins,
+  TrendingDown
 } from 'lucide-react';
 import AnimatedCounter from '../components/AnimatedCounter';
 import WindAnimation from '../components/WindAnimation';
@@ -35,7 +37,9 @@ import {
   formatSignedMW, 
   formatPct, 
   formatUTCDate,
-  formatUTCTime 
+  formatUTCTime,
+  formatGBP,
+  formatWatts
 } from '../utils/formatters';
 
 export default function OverviewPage({ 
@@ -43,7 +47,8 @@ export default function OverviewPage({
   loading, 
   cutoffTime, 
   onChangeCutoff,
-  onNavigateToExplorer
+  onNavigateToExplorer,
+  onOpenCalendar
 }) {
   if (loading && !overviewData) {
     return (
@@ -122,6 +127,15 @@ export default function OverviewPage({
               <CheckCircle2 size={14} className="text-[#42DDB2]" />
               <span>Latest Publication: <strong className="text-white">{overviewData?.latestPublicationTime || '10:45 UTC'}</strong></span>
             </div>
+
+            <button
+              onClick={onOpenCalendar}
+              className="flex items-center gap-1.5 bg-[#42DDB2]/15 hover:bg-[#42DDB2]/25 px-3 py-1.5 rounded-lg border border-[#42DDB2]/40 text-xs font-semibold text-[#42DDB2] transition-colors cursor-pointer shadow-sm ml-auto"
+              title="Click to view interactive Trading Calendar and Monthly P&L"
+            >
+              <Calendar size={14} />
+              <span>Trading Calendar &amp; Monthly P&amp;L &rarr;</span>
+            </button>
           </div>
         </div>
       </div>
@@ -234,6 +248,97 @@ export default function OverviewPage({
           </div>
         </motion.div>
       </motion.div>
+
+      {/* Monthly Financials, Watts & Imbalance P&L Summary Section */}
+      {overviewData?.financialMetrics && (
+        <div className="bg-[#122337] border border-slate-800 rounded-2xl p-5 shadow-xl space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-sm font-bold text-white flex items-center gap-2">
+                  <Coins size={16} className="text-[#42DDB2]" />
+                  Monthly Wholesale Energy Income &amp; Imbalance P&amp;L Analysis
+                </h3>
+                <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                  overviewData.financialMetrics.summary.profitOrLoss === 'PROFIT'
+                    ? 'bg-emerald-500/20 text-emerald-300'
+                    : 'bg-rose-500/20 text-rose-300'
+                }`}>
+                  {overviewData.financialMetrics.summary.profitOrLoss === 'PROFIT' ? 'NET SURPLUS PROFIT' : 'NET IMBALANCE DEFICIT LOSS'}
+                </span>
+              </div>
+              <p className="text-xs text-slate-400">
+                Evaluating wholesale delivery revenue (@ £78.50/MWh) against Day-Ahead forecasting imbalance penalties.
+              </p>
+            </div>
+
+            <button
+              onClick={onOpenCalendar}
+              className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-[#42DDB2]/15 to-[#78A8FF]/15 hover:from-[#42DDB2]/25 hover:to-[#78A8FF]/25 border border-[#42DDB2]/40 text-xs font-semibold text-white transition-all cursor-pointer shadow-sm shrink-0"
+            >
+              <Calendar size={14} className="text-[#42DDB2]" />
+              <span>Open Trading Calendar &amp; Last Months &rarr;</span>
+            </button>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="bg-[#091322] border border-slate-800/80 rounded-xl p-3.5">
+              <span className="text-[11px] text-slate-400 flex items-center gap-1.5">
+                <Zap size={12} className="text-[#42DDB2]" /> Energy Delivered (Watts/GWh)
+              </span>
+              <div className="text-lg font-bold text-white font-mono mt-1">
+                {overviewData.financialMetrics.summary.totalEnergyGWh} GWh
+              </div>
+              <span className="text-[10px] text-slate-500 font-mono">
+                {formatWatts(overviewData.financialMetrics.summary.avgPowerWatts)} avg output
+              </span>
+            </div>
+
+            <div className="bg-[#091322] border border-slate-800/80 rounded-xl p-3.5">
+              <span className="text-[11px] text-slate-400 flex items-center gap-1.5">
+                <Coins size={12} className="text-[#78A8FF]" /> Wholesale Market Revenue
+              </span>
+              <div className="text-lg font-bold text-[#78A8FF] font-mono mt-1">
+                {formatGBP(overviewData.financialMetrics.summary.grossWholesaleIncomeGBP)}
+              </div>
+              <span className="text-[10px] text-slate-500 font-mono">
+                Day-Ahead EPEX SPOT index
+              </span>
+            </div>
+
+            <div className="bg-[#091322] border border-slate-800/80 rounded-xl p-3.5">
+              <span className="text-[11px] text-rose-400 flex items-center gap-1.5">
+                <TrendingDown size={12} /> Shortfall Imbalance Penalty
+              </span>
+              <div className="text-lg font-bold text-rose-400 font-mono mt-1">
+                -{formatGBP(overviewData.financialMetrics.summary.shortfallPenaltyLossGBP)}
+              </div>
+              <span className="text-[10px] text-rose-400/80 font-mono">
+                System Buy Price cashout cost
+              </span>
+            </div>
+
+            <div className={`border rounded-xl p-3.5 ${
+              overviewData.financialMetrics.summary.profitOrLoss === 'PROFIT'
+                ? 'bg-emerald-950/20 border-emerald-500/30'
+                : 'bg-rose-950/20 border-rose-500/30'
+            }`}>
+              <span className="text-[11px] text-slate-300 flex items-center gap-1.5 font-semibold">
+                <TrendingUp size={12} className={overviewData.financialMetrics.summary.profitOrLoss === 'PROFIT' ? 'text-emerald-400' : 'text-rose-400'} />
+                Net Imbalance P&amp;L
+              </span>
+              <div className={`text-lg font-bold font-mono mt-1 ${
+                overviewData.financialMetrics.summary.profitOrLoss === 'PROFIT' ? 'text-emerald-400' : 'text-rose-400'
+              }`}>
+                {overviewData.financialMetrics.summary.netImbalancePnLGBP > 0 ? '+' : ''}{formatGBP(overviewData.financialMetrics.summary.netImbalancePnLGBP)}
+              </div>
+              <span className="text-[10px] text-slate-400 font-mono">
+                {overviewData.financialMetrics.summary.profitOrLoss === 'PROFIT' ? 'Surplus power gain' : 'Unhedged shortfall deficit'}
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Analytical Insight Alert Box */}
       <div className="p-4 rounded-xl bg-gradient-to-r from-[#122337] to-[#172d47] border border-[#78A8FF]/30 shadow-lg flex items-start gap-3.5">

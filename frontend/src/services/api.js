@@ -42,6 +42,15 @@ export const api = {
     return fetchJSON(`/api/overview?${params.toString()}`);
   },
 
+  // GET /api/financials?month=2026-01&cutoff_time=11:00
+  getFinancials: (month = '2026-01', cutoffTime = '11:00') => {
+    const params = new URLSearchParams({
+      month: month,
+      cutoff_time: cutoffTime
+    });
+    return fetchJSON(`/api/financials?${params.toString()}`);
+  },
+
   // GET /api/forecasts?delivery_date=2026-01-15&cutoff_time=11:00
   getForecasts: (deliveryDate = '2026-01-15', cutoffTime = '11:00') => {
     const params = new URLSearchParams({

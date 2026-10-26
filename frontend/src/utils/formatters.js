@@ -88,6 +88,38 @@ export function formatFullUTCTimestamp(isoStr) {
     const mins = d.getUTCMinutes().toString().padStart(2, '0');
     return `${day} ${month} ${year} ${hours}:${mins} UTC`;
   } catch {
-    return isoStr;
+    return dateStr;
   }
+}
+
+export function formatGBP(val, decimals = 0) {
+  if (val === null || val === undefined || isNaN(val)) return '—';
+  const num = Number(val);
+  const sign = num < 0 ? '-' : '';
+  const abs = Math.abs(num);
+  if (abs >= 1_000_000_000) {
+    return `${sign}£${(abs / 1_000_000_000).toFixed(2)}B`;
+  }
+  if (abs >= 1_000_000) {
+    return `${sign}£${(abs / 1_000_000).toFixed(2)}M`;
+  }
+  if (abs >= 1_000) {
+    return `${sign}£${(abs / 1_000).toFixed(1)}k`;
+  }
+  return `${sign}£${abs.toFixed(decimals)}`;
+}
+
+export function formatWatts(wattsVal) {
+  if (wattsVal === null || wattsVal === undefined || isNaN(wattsVal)) return '—';
+  const num = Number(wattsVal);
+  if (num >= 1e12) {
+    return `${(num / 1e12).toFixed(2)} TW`;
+  }
+  if (num >= 1e9) {
+    return `${(num / 1e9).toFixed(2)} GW`;
+  }
+  if (num >= 1e6) {
+    return `${(num / 1e6).toFixed(1)} MW`;
+  }
+  return `${num.toLocaleString()} W`;
 }

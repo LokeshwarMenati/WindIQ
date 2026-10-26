@@ -142,6 +142,25 @@ def get_vintages(
     processor.ensure_loaded()
     return processor.get_vintages_for_date(delivery_date)
 
+@router.get("/financials")
+def get_financials(
+    month: str = Query("2026-01", description="Target calendar month (YYYY-MM)"),
+    cutoff_time: str = Query("11:00", description="D-1 Day-Ahead decision cutoff (HH:MM)"),
+    processor: DataProcessor = Depends(get_processor)
+):
+    """
+    Monthly Energy Volume, Income & Imbalance P&L Analytics:
+    Returns total energy (Watts/MWh/GWh), wholesale power value (£),
+    imbalance penalties (£), surplus gains (£), Net Profit/Loss,
+    daily calendar breakdown, and prior months comparison (December 2025, November 2025).
+    """
+    processor.ensure_loaded()
+    return MetricsEngine.compute_financial_metrics(
+        processor,
+        month=month,
+        cutoff_time=cutoff_time
+    )
+
 @router.post("/refresh", response_model=RefreshResponse)
 def refresh_data(processor: DataProcessor = Depends(get_processor)):
     """

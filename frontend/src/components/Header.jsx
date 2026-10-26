@@ -20,7 +20,8 @@ export default function Header({
   apiStatus = 'online',
   lastRefreshTime,
   onRefresh,
-  isRefreshing = false
+  isRefreshing = false,
+  onOpenCalendar
 }) {
   return (
     <header className="sticky top-0 z-20 bg-[#091322]/90 backdrop-blur-md border-b border-slate-800/80 px-4 md:px-8 py-3.5 flex items-center justify-between gap-4">
@@ -35,11 +36,18 @@ export default function Header({
         </button>
 
         <div className="flex items-center gap-2.5">
-          <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#122337] border border-slate-700/80 text-xs">
-            <Calendar size={14} className="text-[#42DDB2]" />
+          <button
+            onClick={onOpenCalendar}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-[#122337] hover:bg-[#1a3350] border border-slate-700/80 hover:border-[#42DDB2]/60 text-xs transition-all duration-150 cursor-pointer group shadow-sm text-left"
+            title="Click to view interactive Calendar, Watts & Monthly Profit/Loss Analysis"
+          >
+            <Calendar size={14} className="text-[#42DDB2] group-hover:scale-110 transition-transform" />
             <span className="text-slate-400">Analysis Period:</span>
-            <span className="font-semibold text-white">{analysisPeriod}</span>
-          </div>
+            <span className="font-semibold text-white group-hover:text-[#42DDB2]">{analysisPeriod}</span>
+            <span className="hidden sm:inline-flex items-center gap-1 ml-1 px-1.5 py-0.5 rounded text-[10px] bg-[#42DDB2]/15 text-[#42DDB2] font-semibold border border-[#42DDB2]/30">
+              Calendar &amp; P&amp;L &darr;
+            </span>
+          </button>
 
           <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#122337]/70 border border-slate-800 text-xs text-slate-300">
             <Lock size={13} className="text-[#78A8FF]" />

@@ -138,6 +138,7 @@ class OverviewResponse(BaseModel):
     timeSeriesData: List[Dict[str, Any]]
     aggregatedProfile: List[Dict[str, Any]]
     insightSummary: str
+    financialMetrics: Optional[Dict[str, Any]] = None
 
 class ForecastsResponse(BaseModel):
     deliveryDate: str
