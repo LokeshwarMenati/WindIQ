@@ -6,6 +6,7 @@ import Toast from './components/Toast';
 import ClientPitchModal from './components/ClientPitchModal';
 import TechLeadModal from './components/TechLeadModal';
 import ForecastEvolutionModal from './components/ForecastEvolutionModal';
+import CalendarFinancialsModal from './components/CalendarFinancialsModal';
 
 import OverviewPage from './pages/OverviewPage';
 import ForecastExplorerPage from './pages/ForecastExplorerPage';
@@ -33,6 +34,7 @@ export default function App() {
   // Modals state
   const [showPitchModal, setShowPitchModal] = useState(false);
   const [showTechLeadModal, setShowTechLeadModal] = useState(false);
+  const [showCalendarModal, setShowCalendarModal] = useState(false);
   const [selectedEvolution, setSelectedEvolution] = useState(null);
 
   // Toasts state
@@ -154,6 +156,7 @@ export default function App() {
           lastRefreshTime={lastRefreshTime}
           onRefresh={handleRefreshData}
           isRefreshing={isRefreshing}
+          onOpenCalendar={() => setShowCalendarModal(true)}
         />
 
         {/* Dynamic Page Views */}
@@ -167,6 +170,7 @@ export default function App() {
                 cutoffTime={cutoffTime}
                 onChangeCutoff={setCutoffTime}
                 onNavigateToExplorer={handleNavigateToExplorer}
+                onOpenCalendar={() => setShowCalendarModal(true)}
               />
             )}
 
@@ -225,6 +229,14 @@ export default function App() {
       {showTechLeadModal && (
         <TechLeadModal onClose={() => setShowTechLeadModal(false)} />
       )}
+
+      {/* Trading Calendar & Monthly Energy P&L Modal */}
+      <CalendarFinancialsModal
+        isOpen={showCalendarModal}
+        onClose={() => setShowCalendarModal(false)}
+        onSelectDate={handleNavigateToExplorer}
+        cutoffTime={cutoffTime}
+      />
     </div>
   );
 }
